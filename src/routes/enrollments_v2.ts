@@ -66,7 +66,7 @@ router.delete(
   checkRole,
   authAdmin,
   (req: Request, res: Response) => {
-    let cId = req.body.courseId;
+    let cId = req.body.courseNo;
     let s = zCourseId.safeParse(cId);
     if (!s.success) {
       return res.status(400).json({
