@@ -8,6 +8,7 @@ import type { User, CustomRequest } from "../libs/types.ts";
 // import database
 import { users, reset_users } from "../db/db.ts";
 import { success } from "zod";
+import { authenticateToken } from "../middlewares/authenMiddleware.ts";
 
 const router = Router();
 
@@ -42,7 +43,7 @@ router.post("/login", (req: Request, res: Response) => {
   if (found === undefined) {
     return res.json(404).json({
       success: false,
-      message: "no user",
+      message: "No user",
     });
   }
   const jwt_secret = process.env.JWT_SECRET || "this_is_my_secret";
@@ -64,24 +65,52 @@ router.post("/login", (req: Request, res: Response) => {
 });
 
 // POST /api/v2/users/logout
-router.post("/logout", (req: Request, res: Response) => {
-  // 1. check Request if "authorization" header exists
-  //    and container "Bearer ...JWT-Token..."
+router.post(
+  "/logout",
+  authenticateToken,
+  (req: CustomRequest, res: Response) => {
+    // 1. check Request if "authorization" header exists
+    //    and container "Bearer ...JWT-Token..."
 
-  // 2. extract the "...JWT-Token..." if available
+    // 2. extract the "...JWT-Token..." if available
 
-  // 3. verify token using JWT_SECRET_KEY and get payload (username, studentId and role)
+    // 3. verify token using JWT_SECRET_KEY and get payload (username, studentId and role)
 
-  // 4. check if user exists (search with username)
+    // 4. check if user exists (search with username)
 
-  // 5. proceed with logout process and return HTTP response
-  //    (optional: remove the token from User data)
+    // 5. proceed with logout process and return HTTP response
+    //    (optional: remove the token from User data)
 
-  return res.status(500).json({
-    success: false,
-    message: "POST /api/v2/users/logout has not been implemented yet",
-  });
-});
+    const payload_user = req.user;
+    const payload_token = req.token;
+    const user = users.find((u) => u.username === payload_user?.username);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // 5. proceed with logout process and return HTTP response
+    //    (optional: remove the token from User data)
+    user.tokens = user.tokens?.filter((Token) => Token !== payload_token);
+    // if (!user.tokens) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: "User Not found",
+    //   });
+    // }
+    return res.status(200).json({
+      success: true,
+      message: "Sign out successful",
+    });
+
+    return res.status(500).json({
+      success: false,
+      message: "POST /api/v2/users/logout has not been implemented yet",
+    });
+  },
+);
 
 // POST /api/v2/users/reset
 router.post("/reset", (req: Request, res: Response) => {

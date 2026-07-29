@@ -5,7 +5,7 @@ import {
   zCoursePutBody,
 } from "../libs/zodValidators.ts";
 
-import type { Student, Course } from "../libs/types.ts";
+import type { Course } from "../libs/types.ts";
 
 // import database
 import { courses } from "../db/db.ts";
@@ -42,7 +42,7 @@ router.get("/:courseId", (req: Request, res: Response) => {
     }
 
     const foundIndex = courses.findIndex(
-      (c: Course) => c.courseId === courseId
+      (c: Course) => c.courseId === courseId,
     );
 
     if (foundIndex === -1) {
